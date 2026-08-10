@@ -1,3 +1,8 @@
+EPSILON = ""
+
+EPSILON_SYMBOLS = ["", "ε", "epsilon"]
+
+
 def convert_nfa_to_dfa(nfa_data):
     validate_nfa_data(nfa_data)
 
@@ -9,7 +14,7 @@ def convert_nfa_to_dfa(nfa_data):
 
     transition_map = build_transition_map(transitions)
 
-    initial_subset = frozenset([initial_state])
+    initial_subset = epsilon_closure([initial_state], transition_map)
 
     pending_subsets = [initial_subset]
     discovered_subsets = {initial_subset}
@@ -33,7 +38,10 @@ def convert_nfa_to_dfa(nfa_data):
             if not destination_subset:
                 continue
 
-            frozen_destination = frozenset(destination_subset)
+            frozen_destination = epsilon_closure(
+                destination_subset,
+                transition_map
+            )
 
             dfa_transitions.append({
                 "from": format_subset(current_subset),
@@ -128,7 +136,7 @@ def validate_nfa_data(nfa_data):
                 f"Transition destination {destination} does not belong to states."
             )
 
-        if symbol not in alphabet:
+        if symbol not in alphabet and symbol not in EPSILON_SYMBOLS:
             raise ValueError(
                 f"Transition symbol '{symbol}' does not belong to the alphabet."
             )
@@ -142,6 +150,9 @@ def build_transition_map(transitions):
         symbol = transition["symbol"]
         destination = transition["to"]
 
+        if symbol in EPSILON_SYMBOLS:
+            symbol = EPSILON
+
         key = (origin, symbol)
 
         if key not in transition_map:
@@ -150,6 +161,26 @@ def build_transition_map(transitions):
         transition_map[key].add(destination)
 
     return transition_map
+
+
+def epsilon_closure(states, transition_map):
+    closure = set(states)
+    pending_states = list(states)
+
+    while pending_states:
+        current_state = pending_states.pop()
+
+        key = (current_state, EPSILON)
+
+        if key not in transition_map:
+            continue
+
+        for destination in transition_map[key]:
+            if destination not in closure:
+                closure.add(destination)
+                pending_states.append(destination)
+
+    return frozenset(closure)
 
 
 def move(current_subset, symbol, transition_map):

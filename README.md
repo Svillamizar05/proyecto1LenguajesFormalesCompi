@@ -12,7 +12,7 @@ It also provides an endpoint to simulate strings over the generated DFA.
 
 ### Operating System
 
-- macOS 26.5.1
+- macOS 26.5.1 and Arch Linux in Intel silicon
 
 ### Programming Language
 
@@ -117,21 +117,37 @@ POST /simulate
 
 ## Algorithm
 
-The conversion is performed using the **Subset Construction Algorithm**.
+Every DFA state is a subset of NFA states. Two operations build those subsets:
 
-The algorithm starts with the initial state of the NFA represented as a subset.
+- **move(T, a)**: all NFA states reachable from any state of `T` by consuming the symbol `a`.
+- **epsilon-closure(T)**: all NFA states reachable from any state of `T` by following epsilon transitions only, without consuming input.
 
-For every subset and every symbol of the alphabet, it computes all reachable NFA states.
+The algorithm starts with `epsilon-closure({initial})` as the first DFA state.
 
-Each different subset becomes a new DFA state.
+For every pending subset `T` and every symbol `a` of the alphabet, it computes `epsilon-closure(move(T, a))`. If that subset is not empty and has not been seen before, it becomes a new DFA state and is added to the pending list.
 
 A DFA state is marked as accepting if its subset contains at least one accepting state of the original NFA.
 
 The algorithm finishes when no new subsets are generated.
+
+Each DFA state is named by concatenating the NFA states of its subset, so the subset `{0, 1, 3, 7}` is written `0137`.
+
+### Epsilon transitions
+
+An epsilon transition is written by leaving the symbol empty, or by using `ε` or `"epsilon"`:
+as an example: 
+
+```json
+{ "from": 0, "symbol": "", "to": 1 }
+```
+
+The epsilon symbol does not need to be listed in the `alphabet` field.
+
+Subsets that have no transition for a given symbol simply have no entry in the output `transitions` list. The dead state is therefore implicit: when `/simulate` finds no transition for the current state and symbol, it stops and rejects the string.
 
 ---
 
 ## Authors
 
 - Santiago Villamizar
-- Juan Sebastian
+- Juan Sebastian Ramirez
