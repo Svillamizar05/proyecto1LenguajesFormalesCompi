@@ -198,3 +198,9 @@ def move(current_subset, symbol, transition_map):
 def format_subset(subset):
     ordered_states = sorted(subset)
     return "".join(str(state) for state in ordered_states)
+
+
+
+#. 0 ----- a ---->1
+#. 0 ----- a ---->2
+#. 0 ----- a ---->12

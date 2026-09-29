@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
 from gateway.automata_gateway import (
     convert_automaton,
-    simulate_automaton
+    simulate_automaton,
+    minimize_automaton
 )
 
 automata_controller = Blueprint("automata_controller", __name__)
@@ -56,6 +57,31 @@ def simulate():
             request_data["dfa"],
             request_data["input"]
         )
+
+        return jsonify(result), 200
+
+    except ValueError as error:
+        return jsonify({
+            "error": str(error)
+        }), 400
+
+    except RuntimeError as error:
+        return jsonify({
+            "error": str(error)
+        }), 500
+
+
+@automata_controller.route("/minimize", methods=["POST"])
+def minimize():
+    try:
+        dfa_data = request.get_json(silent=True)
+
+        if dfa_data is None:
+            return jsonify({
+                "error": "The request body must contain valid JSON."
+            }), 400
+
+        result = minimize_automaton(dfa_data)
 
         return jsonify(result), 200
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finite Automata Web Server</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <main>
+    <header><h1>Finite Automata Web Server</h1><p>Formal Languages - Assignment 2</p></header>
+    <nav aria-label="Automata tools">
+      <button type="button" data-panel="convert" aria-pressed="false">NFA to DFA</button>
+      <button type="button" data-panel="simulate" aria-pressed="false">Simulate DFA</button>
+      <button type="button" data-panel="minimize" aria-pressed="true">Minimize DFA</button>
+    </nav>
+    <section id="minimize" class="tool">
+      <div class="section-heading"><div><h2>Minimize DFA</h2></div><button type="button" class="secondary" id="load-minimize">Load Assignment 2 Example</button></div>
+      <div class="workspace"><form id="minimize-form" class="card">
+        <p class="hint">Use JSON arrays and consistent state types. All states should be reachable.</p>
+        <div class="fields"><label>States<input id="min-states" value="[0, 1, 2, 3, 4, 5]" required></label><label>Alphabet<input id="min-alphabet" value='["a", "b"]' required></label><label>Initial state<input id="min-initial" value="0" required></label><label>Accepting states<input id="min-accepting" value="[1, 4, 5]" required></label></div>
+        <div class="table-heading"><h4>Transition table</h4><button type="button" class="text-button" id="build-table">Update table</button></div><p class="hint">Update the table after changing states or alphabet. One destination per cell.</p>
+        <div id="transition-table" class="table-scroll"></div><button type="submit" class="primary">Find Equivalent States</button>
+      </form><aside class="card result" aria-live="polite" aria-atomic="true" id="min-result"><div class="card-heading"><h3>Result — Equivalent pairs</h3></div><div class="result-body"><p class="empty">Your equivalent pairs will appear here.</p></div></aside></div>
+    </section>
+    <section id="convert" class="tool" hidden>
+      <div class="section-heading"><div><h2>NFA to DFA</h2></div><button type="button" class="secondary" id="load-convert">Load NFA Example</button></div>
+      <div class="workspace"><form id="convert-form" class="card"><p class="hint">Lists and transitions use JSON. A state is a number or a quoted string.</p><div class="fields"><label>States<input id="nfa-states" required></label><label>Alphabet<input id="nfa-alphabet" required></label><label>Initial state<input id="nfa-initial" required></label><label>Accepting states<input id="nfa-accepting" required></label></div><label>Transitions<textarea id="nfa-transitions" rows="10" spellcheck="false" required></textarea></label><button type="submit" class="primary">Convert to DFA</button></form><aside id="convert-result" class="card result" aria-live="polite" aria-atomic="true"><div class="card-heading"><h3>Resulting DFA</h3></div><div class="result-body"><p class="empty">Your converted DFA will appear here.</p></div></aside></div>
+    </section>
+    <section id="simulate" class="tool" hidden>
+      <div class="section-heading"><div><h2>Simulate DFA</h2></div><button type="button" class="secondary" id="load-simulate">Load Simulation Example</button></div>
+      <div class="workspace"><form id="simulate-form" class="card"><label>DFA (JSON)<textarea id="sim-dfa" rows="17" spellcheck="false" required></textarea></label><label>Input string<input id="sim-input" placeholder="Leave empty to test the empty string"></label><button type="submit" class="primary">Simulate String</button></form><aside id="sim-result" class="card result" aria-live="polite" aria-atomic="true"><div class="card-heading"><h3>Simulation Result</h3></div><div class="result-body"><p class="empty">Your simulation path will appear here.</p></div></aside></div>
+    </section>
+  </main>
+</body>
+</html>

@@ -20,13 +20,7 @@ http://127.0.0.1:5000
 curl http://127.0.0.1:5000
 ```
 
-Expected response:
-
-```json
-{
-  "message": "NFA to DFA Web Server is running"
-}
-```
+Expected status: **HTTP 200** with an HTML page (`Content-Type: text/html`). Open http://127.0.0.1:5000/ in a browser to use the web demonstration interface.
 
 ---
 
@@ -275,3 +269,82 @@ Expected response:
   "error": "Transition symbol 'b' does not belong to the alphabet."
 }
 ```
+
+---
+
+## 7. Find Equivalent DFA States (Assignment 2)
+
+The official six-state DFA has initial state 0 and accepting states 1, 4, and 5. Send the DFA directly as the request body. The `-i` option displays the HTTP status and headers as well as the JSON body.
+
+```bash
+curl -i -X POST http://127.0.0.1:5000/minimize \
+-H "Content-Type: application/json" \
+-d '{
+  "dfaStates": [0, 1, 2, 3, 4, 5],
+  "alphabet": ["a", "b"],
+  "initialState": 0,
+  "acceptingStates": [1, 4, 5],
+  "transitions": [
+    {"from": 0, "symbol": "a", "to": 1},
+    {"from": 0, "symbol": "b", "to": 2},
+    {"from": 1, "symbol": "a", "to": 3},
+    {"from": 1, "symbol": "b", "to": 4},
+    {"from": 2, "symbol": "a", "to": 4},
+    {"from": 2, "symbol": "b", "to": 3},
+    {"from": 3, "symbol": "a", "to": 5},
+    {"from": 3, "symbol": "b", "to": 5},
+    {"from": 4, "symbol": "a", "to": 5},
+    {"from": 4, "symbol": "b", "to": 5},
+    {"from": 5, "symbol": "a", "to": 5},
+    {"from": 5, "symbol": "b", "to": 5}
+  ]
+}'
+```
+
+Expected status: **HTTP 200**.
+
+Expected response body:
+
+```json
+{
+  "equivalentPairs": [
+    [4, 5]
+  ]
+}
+```
+
+Only states 4 and 5 are equivalent. Both are accepting and both transition to state 5 on either symbol. The response lists equivalent pairs; it does not construct a minimized DFA.
+
+---
+
+## 8. Reject an Incomplete DFA (Assignment 2)
+
+This DFA is missing the transition from state 1 with symbol `b`. Both states are reachable, but the transition function is incomplete.
+
+```bash
+curl -i -X POST http://127.0.0.1:5000/minimize \
+-H "Content-Type: application/json" \
+-d '{
+  "dfaStates": [0, 1],
+  "alphabet": ["a", "b"],
+  "initialState": 0,
+  "acceptingStates": [1],
+  "transitions": [
+    {"from": 0, "symbol": "a", "to": 1},
+    {"from": 0, "symbol": "b", "to": 0},
+    {"from": 1, "symbol": "a", "to": 1}
+  ]
+}'
+```
+
+Expected status: **HTTP 400**.
+
+Expected response body:
+
+```json
+{
+  "error": "Missing DFA transition from 1 with symbol 'b'. Every state must have exactly one transition per alphabet symbol."
+}
+```
+
+`/minimize` requires exactly one transition per state and alphabet symbol and does not insert a sink state. Assignment 2 assumes that the supplied DFA has no unreachable states; the endpoint does not validate reachability.
